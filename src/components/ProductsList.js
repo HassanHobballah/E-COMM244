@@ -1,32 +1,54 @@
-import React, { useState } from 'react';
-import Product from './Product';
-import AddProductForm from './AddProductForm';
+import React, { useEffect, useState } from "react"
+import Product from "./Product"
+import AddProductForm from "./AddProductForm"
 
 function ProductsList() {
-  const [products, setProducts] = useState([
-    { price: 25, details: 'Product 1', stockLevel: 15, category: 'Category A', sku: 'SKU001' },
-    { price: 45, details: 'Product 2', stockLevel: 5, category: 'Category B', sku: 'SKU002' }
-  ]);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [products, setProducts] = useState([])
+  const [searchTerm, setSearchTerm] = useState("")
 
   const handleSearchChange = (event) => {
-    setSearchTerm(event.target.value);
-  };
+    setSearchTerm(event.target.value)
+  }
 
-  const filteredProducts = products.filter(product =>
-    product.details.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredProducts = products.filter((product) =>
+    product.Name.toLowerCase().includes(searchTerm.toLowerCase())
+  )
+
+  async function fetchProducts() {
+    try {
+      const res = await fetch("http://localhost:3001/products/")
+      if (res.ok) {
+        const data = await res.json()
+        setProducts(data)
+      }
+    } catch (err) {
+      console.log(err)
+    }
+  }
+
+  useEffect(() => {
+    fetchProducts()
+  }, [])
 
   return (
     <div>
       <h1>Products</h1>
-      <input type="text" placeholder="Search products" value={searchTerm} onChange={handleSearchChange} />
-      <AddProductForm setProducts={setProducts} />
-      {filteredProducts.map(product => (
-        <Product key={product.sku} product={product} setProducts={setProducts} />
+      <input
+        type="text"
+        placeholder="Search products"
+        value={searchTerm}
+        onChange={handleSearchChange}
+      />
+      <AddProductForm />
+      {filteredProducts.map((product) => (
+        <Product
+          key={product.id}
+          product={product}
+          setProducts={setProducts}
+        />
       ))}
     </div>
-  );
+  )
 }
 
-export default ProductsList;
+export default ProductsList
